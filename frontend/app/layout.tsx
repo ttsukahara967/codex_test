@@ -3,12 +3,12 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Taskflow",
-  description: "今日やることに集中する、シンプルなタスク管理アプリ",
+  description: "A simple task management app that helps you focus on what matters today.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ja">
+    <html lang="en">
       <body>{children}</body>
     </html>
   );

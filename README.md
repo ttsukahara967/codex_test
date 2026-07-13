@@ -1,22 +1,22 @@
 # Taskflow
 
-Next.js、Rust、MySQL、Redisで構成した、単一ユーザー向けのタスク管理アプリです。
+A single-user task management app built with Next.js, Rust, MySQL, and Redis.
 
-## 起動方法
+## Getting Started
 
-1. `.env.example` を `.env` にコピーします。
-2. 必要に応じて `FIXED_PASSWORD` を変更します。
-3. `docker compose up --build` を実行します。
-4. http://localhost:3000 を開きます。
+1. Copy `.env.example` to `.env`.
+2. Change `FIXED_PASSWORD` if needed.
+3. Run `docker compose up --build`.
+4. Open http://localhost:3000.
 
-初期設定のログインパスワードは `taskapp` です。
+The initial login password is `taskapp`.
 
-## 構成
+## Structure
 
 - `frontend`: Next.js
 - `backend`: Rust / Axum
-- `mysql`: タスクの永続化
-- `redis`: ログインセッション
+- `mysql`: Stores tasks persistently
+- `redis`: Stores login sessions
 
 ## API
 
@@ -28,4 +28,4 @@ Next.js、Rust、MySQL、Redisで構成した、単一ユーザー向けのタ�
 - `PATCH /api/tasks/:id`
 - `DELETE /api/tasks/:id`
 
-この認証方式は初期開発用です。本番運用前にユーザーテーブル、パスワードハッシュ、CSRF対策、TLSを追加してください。
+This authentication approach is intended for initial development only. Before production use, add a user table, password hashing, CSRF protection, and TLS.

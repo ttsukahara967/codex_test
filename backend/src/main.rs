@@ -26,13 +26,13 @@ struct AppState {
 
 #[derive(Debug, Error)]
 enum AppError {
-    #[error("ログインが必要です")]
+    #[error("Authentication required")]
     Unauthorized,
-    #[error("タスクが見つかりません")]
+    #[error("Task not found")]
     NotFound,
     #[error("{0}")]
     BadRequest(String),
-    #[error("内部エラーが発生しました")]
+    #[error("Internal server error")]
     Internal,
 }
 
@@ -88,16 +88,16 @@ async fn main() {
         .max_connections(10)
         .connect(&database_url)
         .await
-        .expect("MySQLへの接続に失敗しました");
-    sqlx::migrate!().run(&db).await.expect("DBマイグレーションに失敗しました");
+        .expect("Failed to connect to MySQL");
+    sqlx::migrate!().run(&db).await.expect("Failed to run database migrations");
 
-    let redis_client = redis::Client::open(redis_url).expect("Redis URLが不正です");
+    let redis_client = redis::Client::open(redis_url).expect("Invalid Redis URL");
     let redis = ConnectionManager::new(redis_client)
         .await
-        .expect("Redisへの接続に失敗しました");
+        .expect("Failed to connect to Redis");
 
     let state = AppState { db, redis, fixed_password: Arc::new(fixed_password) };
-    let origin: HeaderValue = cors_origin.parse().expect("CORS_ORIGINが不正です");
+    let origin: HeaderValue = cors_origin.parse().expect("CORS_ORIGIN is invalid");
 
     let app = Router::new()
         .route("/health", get(health))
@@ -118,13 +118,13 @@ async fn main() {
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080")
         .await
-        .expect("ポート8080を使用できません");
+        .expect("Port 8080 is unavailable");
     tracing::info!("Taskflow API listening on :8080");
-    axum::serve(listener, app).await.expect("APIサーバーが停止しました");
+    axum::serve(listener, app).await.expect("API server stopped");
 }
 
 fn required_env(name: &str) -> String {
-    env::var(name).unwrap_or_else(|_| panic!("環境変数{name}が必要です"))
+    env::var(name).unwrap_or_else(|_| panic!("Environment variable {name} is required"))
 }
 
 async fn health() -> &'static str {
@@ -145,7 +145,7 @@ async fn login(
         .set_ex::<_, _, ()>(format!("session:{token}"), "single-user", SESSION_TTL_SECONDS)
         .await
         .map_err(|error| {
-            tracing::error!(?error, "failed to create session");
+            tracing::error!(?error, "Failed to create session");
             AppError::Internal
         })?;
 
@@ -261,10 +261,10 @@ async fn find_task(db: &MySqlPool, id: i64) -> Result<Task, AppError> {
 fn validate_title(title: &str) -> Result<String, AppError> {
     let title = title.trim();
     if title.is_empty() {
-        return Err(AppError::BadRequest("タスク名を入力してください".into()));
+        return Err(AppError::BadRequest("Please enter a task title".into()));
     }
     if title.chars().count() > 255 {
-        return Err(AppError::BadRequest("タスク名は255文字以内にしてください".into()));
+        return Err(AppError::BadRequest("Task title must be 255 characters or fewer".into()));
     }
     Ok(title.to_owned())
 }
@@ -286,7 +286,7 @@ async fn is_authenticated(state: &AppState, headers: &HeaderMap) -> Result<bool,
         .exists(format!("session:{token}"))
         .await
         .map_err(|error| {
-            tracing::error!(?error, "failed to check session");
+            tracing::error!(?error, "Failed to check session");
             AppError::Internal
         })
 }

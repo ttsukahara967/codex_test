@@ -21,8 +21,8 @@ async function api<T>(path: string, options?: RequestInit): Promise<T> {
     headers: { "Content-Type": "application/json", ...options?.headers },
   });
   if (!response.ok) {
-    const body = await response.json().catch(() => ({ message: "通信に失敗しました" }));
-    throw new Error(body.message ?? "通信に失敗しました");
+    const body = await response.json().catch(() => ({ message: "Failed to connect" }));
+    throw new Error(body.message ?? "Failed to connect");
   }
   if (response.status === 204) return undefined as T;
   return response.json();
@@ -44,7 +44,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    api<{ authenticated: boolean }>("/api/session")
+    api<{ authenticated: boolean }>('/api/session')
       .then(async ({ authenticated }) => {
         setLoggedIn(authenticated);
         if (authenticated) await loadTasks();
@@ -71,7 +71,7 @@ export default function Home() {
       setPassword("");
       await loadTasks();
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "ログインできませんでした");
+      setError(cause instanceof Error ? cause.message : "Failed to log in");
     } finally {
       setBusy(false);
     }
@@ -97,7 +97,7 @@ export default function Home() {
       setTasks((current) => [task, ...current]);
       setTitle("");
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "タスクを追加できませんでした");
+      setError(cause instanceof Error ? cause.message : "Failed to add task");
     } finally {
       setBusy(false);
     }
@@ -117,7 +117,7 @@ export default function Home() {
   }
 
   if (checking) {
-    return <main className="center"><div className="loader" aria-label="読み込み中" /></main>;
+    return <main className="center"><div className="loader" aria-label="Loading" /></main>;
   }
 
   if (!loggedIn) {
@@ -125,18 +125,18 @@ export default function Home() {
       <main className="login-shell">
         <section className="login-copy">
           <span className="eyebrow">TASKFLOW</span>
-          <h1>今日やることを、<br />すっきりひとつに。</h1>
-          <p>迷わず始めて、終わったら消す。毎日の仕事を軽くするシンプルなタスク管理です。</p>
+          <h1>Keep your tasks<br />simple and clear.</h1>
+          <p>Start without hesitation and clear them when you're done. A simple task manager that makes daily work feel lighter.</p>
         </section>
         <section className="login-card" aria-labelledby="login-title">
           <div className="mark">T</div>
-          <h2 id="login-title">おかえりなさい</h2>
-          <p>パスワードを入力して続けてください。</p>
+          <h2 id="login-title">Welcome back</h2>
+          <p>Enter your password to continue.</p>
           <form onSubmit={login}>
-            <label htmlFor="password">パスワード</label>
+            <label htmlFor="password">Password</label>
             <input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required autoFocus />
             {error && <div className="error" role="alert">{error}</div>}
-            <button className="primary" disabled={busy}>{busy ? "確認中…" : "ログイン"}</button>
+            <button className="primary" disabled={busy}>{busy ? "Checking…" : "Log in"}</button>
           </form>
         </section>
       </main>
@@ -147,31 +147,31 @@ export default function Home() {
     <main className="app-shell">
       <header>
         <div className="brand"><span className="mark small">T</span><span>Taskflow</span></div>
-        <button className="text-button" onClick={logout}>ログアウト</button>
+        <button className="text-button" onClick={logout}>Log out</button>
       </header>
 
       <section className="workspace">
         <div className="heading-row">
           <div>
             <span className="eyebrow">MY TASKS</span>
-            <h1>今日のタスク</h1>
-            <p>{remaining === 0 ? "すべて完了しました。おつかれさまです。" : `あと ${remaining} 件。ひとつずつ片づけましょう。`}</p>
+            <h1>Today's tasks</h1>
+            <p>{remaining === 0 ? "All done. Great work." : `Only ${remaining} left. Let's keep going.`}</p>
           </div>
-          <div className="count"><strong>{remaining}</strong><span>残り</span></div>
+          <div className="count"><strong>{remaining}</strong><span>Remaining</span></div>
         </div>
 
         <form className="task-form" onSubmit={addTask}>
-          <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="新しいタスクを入力…" maxLength={255} aria-label="新しいタスク" />
-          <button className="primary" disabled={busy || !title.trim()}>追加</button>
+          <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Enter a new task…" maxLength={255} aria-label="New task" />
+          <button className="primary" disabled={busy || !title.trim()}>Add</button>
         </form>
 
         {error && <div className="error" role="alert">{error}</div>}
 
         <div className="toolbar">
-          <div className="filters" aria-label="タスクの絞り込み">
+          <div className="filters" aria-label="Filter tasks">
             {(["all", "active", "done"] as Filter[]).map((item) => (
               <button key={item} className={filter === item ? "active" : ""} onClick={() => setFilter(item)}>
-                {{ all: "すべて", active: "未完了", done: "完了" }[item]}
+                {{ all: "All", active: "Active", done: "Done" }[item]}
               </button>
             ))}
           </div>
@@ -180,12 +180,12 @@ export default function Home() {
 
         <div className="task-list">
           {visibleTasks.length === 0 ? (
-            <div className="empty"><div>✓</div><h2>ここにはまだありません</h2><p>上の入力欄からタスクを追加できます。</p></div>
+            <div className="empty"><div>✓</div><h2>No tasks yet</h2><p>You can add tasks from the input field above.</p></div>
           ) : visibleTasks.map((task) => (
             <article className={`task ${task.completed ? "completed" : ""}`} key={task.id}>
-              <button className="check" onClick={() => toggleTask(task)} aria-label={task.completed ? `${task.title}を未完了に戻す` : `${task.title}を完了にする`}>{task.completed ? "✓" : ""}</button>
+              <button className="check" onClick={() => toggleTask(task)} aria-label={task.completed ? `Mark ${task.title} as active` : `Mark ${task.title} as done`}>{task.completed ? "✓" : ""}</button>
               <span>{task.title}</span>
-              <button className="delete" onClick={() => removeTask(task.id)} aria-label={`${task.title}を削除`}>削除</button>
+              <button className="delete" onClick={() => removeTask(task.id)} aria-label={`Delete ${task.title}`}>Delete</button>
             </article>
           ))}
         </div>
