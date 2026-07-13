@@ -1,0 +1,7 @@
+.env
+.DS_Store
+node_modules/
+.pnpm-store/
+.next/
+target/
+*.log
