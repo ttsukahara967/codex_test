@@ -2,6 +2,8 @@
 
 A single-user task management app built with Next.js, Rust, MySQL, and Redis.
 
+![Taskflow screenshot](docs/screenshot.png)
+
 ## Getting Started
 
 1. Copy `.env.example` to `.env`.
